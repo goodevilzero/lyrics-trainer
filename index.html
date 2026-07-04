@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Пісенний тренажер</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14161C; --surface:#1E222B; --surface2:#262B36; --line:#323845;
+    --text:#ECEDEF; --muted:#9AA0AC;
+    --accent:#F2A33C; --green:#5ECB8F; --yellow:#E8B84B; --red:#E2674A;
+    --r:14px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:'Manrope',system-ui,sans-serif; font-size:16px; line-height:1.5;}
+  #app{max-width:560px; margin:0 auto; padding:20px 16px 48px;}
+  h1{font-size:22px; font-weight:800; margin:0;}
+  h2{font-size:17px; font-weight:700; margin:24px 0 10px;}
+  .sub{color:var(--muted); font-size:13px;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:18px;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    background:var(--surface2); color:var(--text); border:1px solid var(--line);
+    border-radius:12px; padding:10px 16px; font:inherit; font-weight:700; font-size:14px;
+    cursor:pointer; text-align:center;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#1A1407;}
+  .btn.ghost{background:transparent;}
+  .btn.small{padding:7px 12px; font-size:13px; border-radius:10px;}
+  .btn.green{background:var(--green); border-color:var(--green); color:#06281A;}
+  .btn.yellow{background:var(--yellow); border-color:var(--yellow); color:#2A2008;}
+  .btn.red{background:var(--red); border-color:var(--red); color:#2B0E07;}
+  .btn.block{width:100%; padding:13px;}
+  .row{display:flex; gap:10px;}
+  .row .btn{flex:1;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:16px; margin-bottom:12px;}
+  .songcard{cursor:pointer;}
+  .songcard:active{background:var(--surface2);}
+  .songtitle{font-weight:800; font-size:17px;}
+  .eq{display:flex; height:8px; border-radius:5px; overflow:hidden; background:var(--surface2); margin-top:12px;}
+  .eq i{display:block; height:100%;}
+  .eq .g{background:var(--green);} .eq .y{background:var(--yellow);}
+  .eq .r{background:var(--red);} .eq .n{background:#3A4150;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
+  .chip{font-size:12px; font-weight:700; padding:3px 9px; border-radius:99px; background:var(--surface2); color:var(--muted);}
+  .chip.g{color:var(--green);} .chip.y{color:var(--yellow);} .chip.r{color:var(--red);}
+  textarea{width:100%; min-height:170px; background:var(--surface); color:var(--text);
+    border:1px solid var(--line); border-radius:var(--r); padding:12px; font-family:monospace; font-size:13px; resize:vertical;}
+  textarea:focus, input:focus{outline:2px solid var(--accent); outline-offset:-1px;}
+  pre{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    padding:12px; font-size:12px; overflow-x:auto; color:var(--muted); white-space:pre-wrap;}
+  .study{min-height:330px; display:flex; flex-direction:column; justify-content:space-between;}
+  .word{font-size:30px; font-weight:800; margin:8px 0 4px; overflow-wrap:anywhere;}
+  .trans{font-size:21px; font-weight:700; color:var(--accent); margin:6px 0; overflow-wrap:anywhere;}
+  .ctx{color:var(--muted); font-size:14px; font-style:italic; margin-top:10px;}
+  .ctx b{color:var(--text); font-style:normal;}
+  .tag{display:inline-block; font-size:11px; font-weight:800; letter-spacing:.5px;
+    text-transform:uppercase; color:var(--muted); border:1px solid var(--line);
+    border-radius:6px; padding:2px 7px; margin-bottom:6px;}
+  .progressline{font-size:13px; color:var(--muted); margin-bottom:10px;}
+  .list-item{display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:10px 0; border-bottom:1px solid var(--line);}
+  .list-item:last-child{border-bottom:none;}
+  .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  .dot.g{background:var(--green);} .dot.y{background:var(--yellow);}
+  .dot.r{background:var(--red);} .dot.n{background:#3A4150;}
+  .li-main{flex:1; min-width:0;}
+  .li-w{font-weight:700;}
+  .li-t{color:var(--muted); font-size:13px;}
+  .tabs{display:flex; gap:8px; margin:14px 0;}
+  .tab{flex:1; text-align:center; padding:9px; border-radius:10px; background:var(--surface);
+    border:1px solid var(--line); font-weight:700; font-size:14px; cursor:pointer; color:var(--muted);}
+  .tab.active{background:var(--surface2); color:var(--text); border-color:var(--accent);}
+  .opt{display:block; width:100%; text-align:left; margin-bottom:8px;}
+  .opt.correct{background:var(--green); border-color:var(--green); color:#06281A;}
+  .opt.wrong{background:var(--red); border-color:var(--red); color:#2B0E07;}
+  .bignum{font-size:42px; font-weight:800; color:var(--accent);}
+  .center{text-align:center;}
+  .notice{font-size:13px; color:var(--yellow); margin-bottom:12px;}
+  .footer-note{color:var(--muted); font-size:12px; text-align:center; margin-top:28px;}
+  @media (prefers-reduced-motion: no-preference){
+    .card{animation:pop .18s ease;}
+    @keyframes pop{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+
+/* ---------- state & storage ---------- */
+let state = { songs: [], known: {} };
+let view = { screen: "library", songId: null, tab: "word" };
+let session = null;
+let storageOk = false;
+let backend = "none"; // "claude" | "local" | "none"
+const KEY = "lyrics-trainer-data";
+
+async function load(){
+  try{
+    if(window.storage && window.storage.get){
+      backend = "claude"; storageOk = true;
+      try{
+        const res = await window.storage.get(KEY);
+        if(res && res.value) state = JSON.parse(res.value);
+      }catch(e){ /* ключа ще нема — норм */ }
+      return;
+    }
+  }catch(e){}
+  try{
+    const raw = localStorage.getItem(KEY);
+    backend = "local"; storageOk = true;
+    if(raw) state = JSON.parse(raw);
+  }catch(e){ backend = "none"; storageOk = false; }
+}
+let saveT = null, saving = false, dirty = false, failNote = false;
+function save(){
+  state.updated = Date.now();
+  schedulePush();
+  if(!storageOk) return;
+  clearTimeout(saveT);
+  saveT = setTimeout(flush, 600);
+}
+async function flush(){
+  if(saving){ dirty = true; return; }
+  saving = true;
+  const payload = JSON.stringify(state);
+  let ok = false;
+  if(backend === "local"){
+    try{ localStorage.setItem(KEY, payload); ok = true; }catch(e){}
+    saving = false;
+    if(!ok) showSaveNote("Не вдалося зберегти у сховище браузера");
+    else if(dirty){ dirty = false; flush(); }
+    return;
+  }
+  for(let attempt = 0; attempt < 3 && !ok; attempt++){
+    try{
+      await window.storage.set(KEY, payload);
+      ok = true;
+    }catch(e){
+      await new Promise(r=>setTimeout(r, 1000 * (attempt+1)));
+    }
+  }
+  saving = false;
+  if(!ok){
+    failNote = true;
+    showSaveNote("Не вдалося зберегти — повторю автоматично");
+    setTimeout(()=>{ dirty = true; flush(); }, 10000);
+    return;
+  }
+  if(failNote){ failNote = false; showSaveNote("Збережено ✓", true); }
+  if(dirty){ dirty = false; flush(); }
+}
+function showSaveNote(text, autohide){
+  let el = document.getElementById("savenote");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "savenote";
+    el.style.cssText = "position:sticky;bottom:10px;margin:10px auto 0;max-width:560px;"+
+      "background:var(--surface2);border:1px solid var(--line);border-radius:10px;"+
+      "padding:8px 12px;font-size:13px;color:var(--yellow);text-align:center;z-index:9";
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+  el.style.color = autohide ? "var(--green)" : "var(--yellow)";
+  el.style.display = "block";
+  if(autohide) setTimeout(()=>{ el.style.display = "none"; }, 2500);
+}
+
+/* ---------- github sync ---------- */
+const SKEY = "lyrics-trainer-sync";
+let sync = { owner:"", repo:"", token:"", branch:"main", path:"progress.json" };
+let syncBusy = false, syncMsg = "", lastSha = null, pushT = null;
+const syncOn = () => !!(sync.owner && sync.repo && sync.token);
+
+const b64enc = s => btoa(unescape(encodeURIComponent(s)));
+const b64dec = s => decodeURIComponent(escape(atob(s.replace(/\n/g,""))));
+
+async function loadSyncCfg(){
+  try{
+    if(backend==="claude"){
+      const r = await window.storage.get(SKEY);
+      if(r && r.value) sync = Object.assign(sync, JSON.parse(r.value));
+    } else if(backend==="local"){
+      const raw = localStorage.getItem(SKEY);
+      if(raw) sync = Object.assign(sync, JSON.parse(raw));
+    }
+  }catch(e){}
+}
+async function saveSyncCfg(){
+  try{
+    if(backend==="claude") await window.storage.set(SKEY, JSON.stringify(sync));
+    else if(backend==="local") localStorage.setItem(SKEY, JSON.stringify(sync));
+  }catch(e){}
+}
+function ghUrl(get){
+  return "https://api.github.com/repos/"+sync.owner+"/"+sync.repo+"/contents/"+sync.path+
+    (get ? "?ref="+sync.branch+"&nocache="+Date.now() : "");
+}
+function ghHeaders(){
+  return { "Authorization":"Bearer "+sync.token, "Accept":"application/vnd.github+json" };
+}
+function setSyncMsg(m){
+  syncMsg = m;
+  const el = document.getElementById("sync-status");
+  if(el) el.textContent = m;
+}
+async function pullRemote(silent){
+  if(!syncOn() || syncBusy) return;
+  if(silent && session) return; // не смикаємо дані посеред тренування
+  syncBusy = true;
+  if(!silent) setSyncMsg("Перевіряю репозиторій…");
+  try{
+    const res = await fetch(ghUrl(true), {headers: ghHeaders()});
+    if(res.status===404){
+      lastSha = null;
+      if(state.songs.length){ syncBusy=false; await pushRemote(true); return; }
+      setSyncMsg("Підключено ✓ (у репозиторії ще немає даних)");
+    } else if(res.status===401 || res.status===403){
+      setSyncMsg("Помилка доступу — перевір токен і його права (Contents: Read and write)");
+    } else if(!res.ok){
+      setSyncMsg("GitHub відповів помилкою "+res.status);
+    } else {
+      const j = await res.json();
+      lastSha = j.sha;
+      const remote = JSON.parse(b64dec(j.content));
+      if((remote.updated||0) > (state.updated||0)){
+        state = { songs: remote.songs||[], known: remote.known||{}, updated: remote.updated };
+        rebuildKnown();
+        if(backend!=="none") flush();
+        render();
+        setSyncMsg("Підтягнуто свіжіший прогрес з репозиторію ✓ "+timeStr());
+      } else if((state.updated||0) > (remote.updated||0)){
+        syncBusy = false; await pushRemote(true); return;
+      } else {
+        setSyncMsg("Синхронізовано ✓ "+timeStr());
+      }
+    }
+  }catch(e){ setSyncMsg("Немає зв'язку з GitHub — працюю локально"); }
+  syncBusy = false;
+}
+async function pushRemote(silent){
+  if(!syncOn() || syncBusy) return;
+  syncBusy = true;
+  if(!silent) setSyncMsg("Зберігаю в репозиторій…");
+  try{
+    // беремо актуальний sha, щоб не перетерти чужі зміни
+    const head = await fetch(ghUrl(true), {headers: ghHeaders()});
+    if(head.ok){
+      const j = await head.json();
+      lastSha = j.sha;
+      const remote = JSON.parse(b64dec(j.content));
+      if((remote.updated||0) > (state.updated||0)){
+        // на сервері новіше — забираємо його замість запису
+        state = { songs: remote.songs||[], known: remote.known||{}, updated: remote.updated };
+        rebuildKnown(); if(backend!=="none") flush(); render();
+        setSyncMsg("На сервері був новіший прогрес — підтягнув його ✓");
+        syncBusy = false; return;
+      }
+    } else if(head.status===404){ lastSha = null; }
+    const body = { message:"progress "+new Date().toISOString(), branch:sync.branch,
+      content: b64enc(JSON.stringify(state)) };
+    if(lastSha) body.sha = lastSha;
+    const res = await fetch(ghUrl(false), {method:"PUT", headers:ghHeaders(), body:JSON.stringify(body)});
+    if(res.ok){
+      const j = await res.json();
+      lastSha = j.content.sha;
+      setSyncMsg("Синхронізовано ✓ "+timeStr());
+    } else if(res.status===401 || res.status===403){
+      setSyncMsg("Помилка доступу — перевір токен");
+    } else setSyncMsg("Не вдалося записати ("+res.status+") — спробую пізніше");
+  }catch(e){ setSyncMsg("Немає зв'язку з GitHub — зміни збережені локально"); }
+  syncBusy = false;
+}
+function schedulePush(){
+  if(!syncOn()) return;
+  clearTimeout(pushT);
+  pushT = setTimeout(()=>pushRemote(true), 30000);
+}
+function timeStr(){ const d=new Date(); return d.getHours()+":"+String(d.getMinutes()).padStart(2,"0"); }
+setInterval(()=>{ if(syncOn() && !document.hidden) pullRemote(true); }, 5*60*1000);
+const uid = () => Math.random().toString(36).slice(2,10);
+const esc = s => String(s||"").replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
+const songById = id => state.songs.find(s=>s.id===id);
+const norm = w => String(w||"").toLowerCase().trim();
+
+function counts(song){
+  const c = {know:0, unsure:0, dont:0, neu:0};
+  for(const it of song.items){
+    if(it.status==="know") c.know++;
+    else if(it.status==="unsure") c.unsure++;
+    else if(it.status==="dont") c.dont++;
+    else c.neu++;
+  }
+  c.total = song.items.length;
+  return c;
+}
+function markKnown(it){
+  it.status = "know"; it.unsureStreak = 0;
+  if(it.kind==="word") state.known[norm(it.text)] = true;
+}
+function demoteItem(it){
+  if(it.status==="know"){
+    it.status="unsure"; it.unsureStreak=0;
+    if(it.kind==="word") delete state.known[norm(it.text)];
+  } else if(it.status==="unsure"){
+    it.status="dont"; it.unsureStreak=0;
+  } else {
+    it.status="dont"; it.unsureStreak=0;
+  }
+}
+function rebuildKnown(){
+  state.known = {};
+  for(const s of state.songs)
+    for(const it of s.items)
+      if(it.kind==="word" && it.status==="know") state.known[norm(it.text)] = true;
+}
+function armConfirm(btn, fn){
+  if(!btn.dataset.armed){
+    btn.dataset.armed = "1";
+    btn.dataset.label = btn.textContent;
+    btn.textContent = "Точно? (натисни ще раз)";
+    btn.style.background = "var(--red)";
+    btn.style.color = "#2B0E07";
+    setTimeout(()=>{ if(btn.isConnected && btn.dataset.armed){ delete btn.dataset.armed;
+      btn.textContent = btn.dataset.label; btn.style.background="transparent"; btn.style.color="var(--red)"; } }, 3000);
+    return;
+  }
+  fn();
+}
+function highlightCtx(it){
+  if(!it.c) return "";
+  const re = new RegExp("("+it.text.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","i");
+  return "<div class='ctx'>«"+esc(it.c).replace(re,"<b>$1</b>")+"»</div>";
+}
+const kindTag = it => it.kind==="phrase" ? "<span class='tag'>фраза</span>" : "";
+
+/* ---------- import ---------- */
+const PROMPT_TEXT =
+`Ось текст пісні. Зроби з нього структуровані дані для тренажера вивчення слів. Виконай суворо за інструкцією:
+
+1. Список слів (words):
+- Випиши всі унікальні значущі слова: іменники, дієслова, прикметники, прислівники, сленг
+- Пропускай: артиклі (a, an, the), прийменники (in, on, at...), займенники (I, you, he...), числівники, вигуки (oh, ah...), повтори того самого слова
+- Слово давай у базовій формі: інфінітив для дієслів (running→run), однина для іменників (roses→rose)
+- Для кожного слова:
+  "w" — базова форма слова
+  "t" — переклад українською; якщо кілька значень — через крапку з комою
+  "c" — точний рядок з тексту, де слово зустрічається вперше (дослівно, не вигадуй)
+  "tr" — транскрипція IPA тільки для слів із неочевидною вимовою (through, choir, colonel, subtle, gauge, island, queue, ache, knight тощо). Для простих слів (run, love, feel) поле "tr" не додавай взагалі.
+
+2. Список фраз (phrases):
+- Фразові дієслова, ідіоми, сленг і сталі вирази, значення яких не збігається з дослівним перекладом
+- Для кожної фрази:
+  "p" — фраза як у тексті
+  "t" — переклад або пояснення українською (якщо є цікавий контекст — коротко в дужках)
+  "c" — точний рядок з тексту
+
+3. Формат: віддай результат СУВОРО одним JSON-блоком, без жодного пояснення або тексту до чи після. Перший символ — {, останній — }.
+
+Формат JSON:
+{"title":"Назва","artist":"Виконавець","words":[{"w":"слово","t":"переклад","c":"рядок"},{"w":"слово","t":"переклад","c":"рядок","tr":"trænˈskrɪpʃən"}],"phrases":[{"p":"фраза","t":"пояснення","c":"рядок"}]}
+
+Текст пісні:
+`;
+
+function importSong(jsonText){
+  let data;
+  try{ data = JSON.parse(jsonText.trim()); }
+  catch(e){ return {err:"Не вдалося прочитати JSON. Перевір, що скопійовано весь блок від { до }."}; }
+  if(!data.title || (!Array.isArray(data.words) && !Array.isArray(data.phrases)))
+    return {err:"У JSON немає title або списків words/phrases."};
+  const items = [];
+  let autoKnown = 0;
+  for(const w of (data.words||[])){
+    if(!w.w || !w.t) continue;
+    const it = {id:uid(), kind:"word", text:w.w, t:w.t, c:w.c||"", tr:w.tr||"", status:"new"};
+    if(state.known[norm(w.w)]){ it.status="know"; autoKnown++; }
+    items.push(it);
+  }
+  for(const p of (data.phrases||[])){
+    if(!p.p || !p.t) continue;
+    items.push({id:uid(), kind:"phrase", text:p.p, t:p.t, c:p.c||"", status:"new"});
+  }
+  if(!items.length) return {err:"Список слів порожній."};
+  const song = {id:uid(), title:data.title, artist:data.artist||"", items, added:Date.now()};
+  state.songs.unshift(song);
+  save();
+  return {song, autoKnown};
+}
+
+/* ---------- demo song (вигаданий текст, не реальна пісня) ---------- */
+const DEMO = {
+  title:"Demo Song", artist:"для проби",
+  words:[
+    {w:"river",t:"річка",c:"Down by the river we sang all night"},
+    {w:"bright",t:"яскравий",c:"Under a bright and endless sky"},
+    {w:"endless",t:"нескінченний",c:"Under a bright and endless sky"},
+    {w:"whisper",t:"шепотіти; шепіт",c:"You whisper my name into the wind"},
+    {w:"wind",t:"вітер",c:"You whisper my name into the wind"},
+    {w:"promise",t:"обіцянка; обіцяти",c:"A promise made when we were young"},
+    {w:"young",t:"молодий",c:"A promise made when we were young"},
+    {w:"shadow",t:"тінь",c:"Shadows fall but we keep on"},
+    {w:"burn",t:"горіти; палити",c:"Let the old fires burn again"},
+    {w:"road",t:"дорога",c:"This long road will lead us home"}
+  ],
+  phrases:[
+    {p:"keep on",t:"продовжувати, не зупинятися",c:"Shadows fall but we keep on"},
+    {p:"lead home",t:"привести додому (повернути до рідного)",c:"This long road will lead us home"}
+  ]
+};
+
+/* ---------- rendering ---------- */
+const app = document.getElementById("app");
+function go(screen, extra){ view = Object.assign({}, view, {screen}, extra||{}); render(); }
+
+function render(){
+  window.scrollTo(0,0);
+  if(view.screen==="library") return rLibrary();
+  if(view.screen==="import") return rImport();
+  if(view.screen==="song") return rSong();
+  if(view.screen==="study") return rStudy();
+  if(view.screen==="test") return rTest();
+  if(view.screen==="stats") return rStats();
+}
+
+function rLibrary(){
+  let html = "<div class='topbar'><h1>Пісенний тренажер</h1>"+
+    "<button class='btn small ghost' onclick=\"go('stats')\">Статистика</button></div>";
+  if(!storageOk) html += "<div class='notice'>Сховище недоступне — дані живуть лише до закриття сторінки.</div>";
+  html += "<button class='btn primary block' onclick=\"go('import')\">+ Додати пісню</button>";
+  if(state.songs.length){
+    const allLearn = state.songs.reduce((n,s)=>n+counts(s).dont+counts(s).unsure,0);
+    const allPool = state.songs.reduce((n,s)=>n+s.items.filter(i=>i.status!=="new").length,0);
+    if(allLearn>0 || allPool>0){
+      html += "<div class='row' style='margin-top:10px'>";
+      if(allLearn>0) html += "<button class='btn yellow' onclick='startGlobalStudy()'>Вчити все ("+allLearn+")</button>";
+      if(allPool>0) html += "<button class='btn' onclick='startGlobalTest()'>Тест по всіх ("+allPool+")</button>";
+      html += "</div>";
+    }
+  }
+  if(!state.songs.length){
+    html += "<div class='card center' style='margin-top:14px'>"+
+      "<p class='sub'>Поки що порожньо. Додай першу пісню або спробуй демо.</p>"+
+      "<button class='btn block' onclick='loadDemo()'>Спробувати демо-пісню</button></div>";
+  }
+  html += "<div style='margin-top:14px'>";
+  for(const s of state.songs){
+    const c = counts(s);
+    const pct = v => c.total ? (v/c.total*100).toFixed(1) : 0;
+    html += "<div class='card songcard' onclick=\"go('song',{songId:'"+s.id+"',tab:'word'})\">"+
+      "<div class='songtitle'>"+esc(s.title)+"</div>"+
+      (s.artist?"<div class='sub'>"+esc(s.artist)+"</div>":"")+
+      "<div class='eq'>"+
+        "<i class='g' style='width:"+pct(c.know)+"%'></i>"+
+        "<i class='y' style='width:"+pct(c.unsure)+"%'></i>"+
+        "<i class='r' style='width:"+pct(c.dont)+"%'></i>"+
+        "<i class='n' style='width:"+pct(c.neu)+"%'></i></div>"+
+      "<div class='chips'>"+
+        "<span class='chip g'>знаю "+c.know+"</span>"+
+        "<span class='chip y'>сумніваюся "+c.unsure+"</span>"+
+        "<span class='chip r'>не знаю "+c.dont+"</span>"+
+        (c.neu?"<span class='chip'>нові "+c.neu+"</span>":"")+
+      "</div></div>";
+  }
+  html += "</div><div class='footer-note'>Дані зберігаються у твоєму акаунті. Прогрес «знаю» діє на всі пісні.</div>";
+  app.innerHTML = html;
+}
+
+function loadDemo(){
+  const r = importSong(JSON.stringify(DEMO));
+  if(r.song) go("song",{songId:r.song.id, tab:"word"});
+}
+
+function rImport(){
+  app.innerHTML =
+    "<div class='topbar'><h1>Нова пісня</h1>"+
+    "<button class='btn small ghost' onclick=\"go('library')\">← Назад</button></div>"+
+    "<p class='sub'>1. Скопіюй промпт і встав його в чат із Claude разом із текстом пісні.<br>"+
+    "2. Отриманий JSON встав сюди і натисни «Імпортувати».</p>"+
+    "<button class='btn block' onclick='copyPrompt(this)'>Скопіювати промпт для чату</button>"+
+    "<h2>JSON від Claude</h2>"+
+    "<textarea id='jsonin' placeholder='{\"title\":\"...\",\"words\":[...]}'></textarea>"+
+    "<div id='imp-err' class='notice'></div>"+
+    "<button class='btn primary block' onclick='doImport()'>Імпортувати</button>";
+}
+function copyPrompt(btn){
+  navigator.clipboard.writeText(PROMPT_TEXT).then(()=>{
+    btn.textContent = "Скопійовано ✓";
+    setTimeout(()=>btn.textContent="Скопіювати промпт для чату", 1500);
+  });
+}
+function doImport(){
+  const r = importSong(document.getElementById("jsonin").value);
+  if(r.err){ document.getElementById("imp-err").textContent = r.err; return; }
+  let msg = "";
+  if(r.autoKnown) msg = r.autoKnown+" слів уже у твоєму словнику — позначені як «знаю» автоматично.";
+  go("song",{songId:r.song.id, tab:"word", flash:msg});
+}
+
+function rSong(){
+  const s = songById(view.songId);
+  if(!s) return go("library");
+  const c = counts(s);
+  const items = s.items.filter(it=>it.kind===view.tab);
+  const order = {dont:0, unsure:1, neu:2, know:3};
+  const sorted = items.slice().sort((a,b)=>
+    (order[a.status==="new"?"neu":a.status]??2)-(order[b.status==="new"?"neu":b.status]??2));
+  let html =
+    "<div class='topbar'><div><h1>"+esc(s.title)+"</h1>"+
+    (s.artist?"<div class='sub'>"+esc(s.artist)+"</div>":"")+"</div>"+
+    "<button class='btn small ghost' onclick=\"go('library')\">← Пісні</button></div>";
+  if(view.flash){ html += "<div class='notice'>"+esc(view.flash)+"</div>"; view.flash=""; }
+  html += "<div class='row'>";
+  if(c.neu>0) html += "<button class='btn primary' onclick=\"startStudy('sort')\">Сортувати нові ("+c.neu+")</button>";
+  if(c.dont+c.unsure>0) html += "<button class='btn yellow' onclick=\"startStudy('learn')\">Вчити ("+(c.dont+c.unsure)+")</button>";
+  if(c.know===c.total && c.total>0) html += "<button class='btn green' onclick='startTest()'>Фінальний тест</button>";
+  else if(c.know>0) html += "<button class='btn' onclick='startTest()'>Тест</button>";
+  html += "</div>";
+  if(c.know===c.total && c.total>0)
+    html += "<div class='card center'>🎧 <b>Все вивчено!</b><div class='sub'>Час увімкнути пісню і зрозуміти кожне слово.</div></div>";
+  html += "<div class='tabs'>"+
+    "<div class='tab "+(view.tab==="word"?"active":"")+"' onclick=\"go('song',{tab:'word'})\">Слова ("+s.items.filter(i=>i.kind==="word").length+")</div>"+
+    "<div class='tab "+(view.tab==="phrase"?"active":"")+"' onclick=\"go('song',{tab:'phrase'})\">Фрази ("+s.items.filter(i=>i.kind==="phrase").length+")</div></div>";
+  html += "<div class='card'>";
+  if(!sorted.length) html += "<p class='sub center'>Тут порожньо.</p>";
+  for(const it of sorted){
+    const d = it.status==="know"?"g":it.status==="unsure"?"y":it.status==="dont"?"r":"n";
+    html += "<div class='list-item'><span class='dot "+d+"'></span>"+
+      "<div class='li-main'><div class='li-w'>"+esc(it.text)+"</div>"+
+      "<div class='li-t'>"+esc(it.t)+"</div></div></div>";
+  }
+  html += "</div>";
+  html += "<div class='row' style='margin-top:4px'>"+
+    "<button class='btn small' style='background:transparent;border-color:var(--red);color:var(--red)' onclick='resetSong(this)'>Скинути прогрес</button>"+
+    "<button class='btn small' style='background:transparent;border-color:var(--red);color:var(--red)' onclick='delSong(this)'>Видалити пісню</button></div>";
+  app.innerHTML = html;
+}
+function delSong(btn){
+  armConfirm(btn, ()=>{
+    state.songs = state.songs.filter(s=>s.id!==view.songId);
+    rebuildKnown(); save(); go("library");
+  });
+}
+function resetSong(btn){
+  armConfirm(btn, ()=>{
+    const s = songById(view.songId);
+    for(const it of s.items) it.status = "new";
+    rebuildKnown(); save(); go("song");
+  });
+}
+
+/* ---------- sort & learn (спільний екран картки) ---------- */
+function startStudy(mode){
+  const s = songById(view.songId);
+  let queue;
+  if(mode==="sort") queue = s.items.filter(i=>i.status==="new");
+  else queue = shuffle(s.items.filter(i=>i.status==="dont"||i.status==="unsure"));
+  session = {mode, queue, done:0, total:queue.length, flipped:false, global:false};
+  go("study");
+}
+function startGlobalStudy(){
+  const queue = shuffle(
+    state.songs.flatMap(s=>s.items.filter(i=>i.status==="dont"||i.status==="unsure"))
+  );
+  if(!queue.length) return;
+  session = {mode:"learn", queue, done:0, total:queue.length, flipped:false, global:true};
+  view.songId = null;
+  go("study");
+}
+function startGlobalTest(){
+  const pool = state.songs.flatMap(s=>s.items.filter(i=>i.status!=="new"));
+  if(!pool.length) return;
+  const allT = state.songs.flatMap(x=>x.items.map(i=>i.t));
+  const qs = shuffle(pool).map(it=>{
+    const wrong = shuffle(allT.filter(t=>t!==it.t)).slice(0,3);
+    return {it, options:shuffle([it.t, ...wrong])};
+  });
+  session = {qs, idx:0, score:0, answered:null, global:true};
+  go("test");
+}
+function flip(){ session.flipped = true; rStudy(); }
+function endStudy(){
+  const wasGlobal = session && session.global;
+  session = null; save();
+  wasGlobal ? go("library") : go("song");
+}
+function rStudy(){
+  const isGlobal = session && session.global;
+  const s = isGlobal ? null : songById(view.songId);
+  if(!session || !session.queue.length){
+    let summary;
+    if(isGlobal){
+      const tk=state.songs.reduce((n,sg)=>n+counts(sg).know,0);
+      const tu=state.songs.reduce((n,sg)=>n+counts(sg).unsure,0);
+      const td=state.songs.reduce((n,sg)=>n+counts(sg).dont,0);
+      summary="Знаю: "+tk+" · Сумніваюся: "+tu+" · Не знаю: "+td;
+    } else {
+      const c=counts(s); summary="Знаю: "+c.know+" · Сумніваюся: "+c.unsure+" · Не знаю: "+c.dont;
+    }
+    const backBtn = isGlobal
+      ? "<button class='btn primary block' onclick=\"go('library')\">До бібліотеки</button>"
+      : "<button class='btn primary block' onclick=\"go('song')\">До пісні</button>";
+    app.innerHTML = "<div class='card center study'><div>"+
+      "<div class='bignum'>✓</div><h2>"+(session&&session.mode==="sort"?"Відсортовано!":"Прогін завершено!")+"</h2>"+
+      "<p class='sub'>"+summary+"</p>"+
+      (session&&session.mode==="learn"?"<p class='sub'>Одне повторення — один крок. Повернися пізніше і прожени ще раз.</p>":"")+"</div>"+
+      backBtn+"</div>";
+    session = null; save(); return;
+  }
+  const it = session.queue[0];
+  const streakHint = (it.status==="unsure" && session.mode!=="sort")
+    ? " · повторень: "+((it.unsureStreak||0)+1)+"/2" : "";
+  const head = "<div class='progressline' style='display:flex;justify-content:space-between;align-items:center'>"+
+    "<span>"+(session.mode==="sort"?"Сортування":"Повторення")+" · залишилось "+session.queue.length+streakHint+"</span>"+
+    "<button class='btn small ghost' onclick=\"endStudy()\">На сьогодні досить</button></div>";
+  if(session.mode==="sort"){
+    app.innerHTML = "<div class='card study'>"+head+
+      "<div>"+kindTag(it)+"<div class='word'>"+esc(it.text)+"</div>"+
+      (it.tr?"<div style='color:var(--muted);font-size:15px;margin-bottom:4px'>["+esc(it.tr)+"]</div>":"")+
+      "<div class='trans'>"+esc(it.t)+"</div>"+highlightCtx(it)+"</div>"+
+      "<div class='row'>"+
+      "<button class='btn green' onclick=\"answerSort('know')\">Знаю</button>"+
+      "<button class='btn yellow' onclick=\"answerSort('unsure')\">Сумніваюся</button>"+
+      "<button class='btn red' onclick=\"answerSort('dont')\">Не знаю</button></div></div>";
+  } else {
+    let body = "<div>"+kindTag(it)+"<div class='word'>"+esc(it.text)+"</div>"+
+      (it.tr?"<div style='color:var(--muted);font-size:15px;margin-bottom:4px'>["+esc(it.tr)+"]</div>":"");
+    if(session.flipped) body += "<div class='trans'>"+esc(it.t)+"</div>"+highlightCtx(it);
+    else body += highlightCtx(it);
+    body += "</div>";
+    let controls = session.flipped
+      ? "<div class='row'><button class='btn green' onclick='answerLearn(true)'>Пам'ятаю</button>"+
+        "<button class='btn red' onclick='answerLearn(false)'>Ще ні</button></div>"
+      : "<button class='btn primary block' onclick='flip()'>Показати переклад</button>";
+    app.innerHTML = "<div class='card study'>"+head+body+controls+"</div>";
+  }
+}
+function answerSort(st){
+  const it = session.queue.shift();
+  if(st==="know") markKnown(it);
+  else { it.status = st; it.unsureStreak = 0; }
+  save(); rStudy();
+}
+function answerLearn(remembered){
+  const it = session.queue.shift();
+  session.flipped = false;
+  if(remembered){
+    if(it.status==="dont"){
+      it.status="unsure"; it.unsureStreak=0;
+    } else if(it.status==="unsure"){
+      it.unsureStreak = (it.unsureStreak||0) + 1;
+      if(it.unsureStreak >= 2) markKnown(it);
+    } else {
+      markKnown(it);
+    }
+  } else {
+    demoteItem(it);
+  }
+  save(); rStudy();
+}
+
+/* ---------- test ---------- */
+function startTest(){
+  const s = songById(view.songId);
+  const pool = s.items.filter(i=>i.status!=="new");
+  const allT = state.songs.flatMap(x=>x.items.map(i=>i.t));
+  const qs = shuffle(pool).map(it=>{
+    const wrong = shuffle(allT.filter(t=>t!==it.t)).slice(0,3);
+    return {it, options:shuffle([it.t, ...wrong])};
+  });
+  session = {qs, idx:0, score:0, answered:null};
+  go("test");
+}
+function rTest(){
+  if(session.idx >= session.qs.length){
+    const ok = session.score===session.qs.length;
+    const isGlobal = session.global;
+    const backBtn = isGlobal
+      ? "<button class='btn primary block' onclick=\"go('library')\">До бібліотеки</button>"
+      : "<button class='btn primary block' onclick=\"go('song')\">До пісні</button>";
+    app.innerHTML = "<div class='card center study'><div>"+
+      "<div class='bignum'>"+session.score+"/"+session.qs.length+"</div>"+
+      "<h2>"+(ok?"Ідеально! 🎧":"Непогано!")+"</h2>"+
+      "<p class='sub'>"+(ok?"Вмикай пісню — тепер ти зрозумієш кожен рядок.":"Слова з помилками відкочено на крок назад, прожени «Вчити» ще раз.")+"</p></div>"+
+      backBtn+"</div>";
+    session = null; return;
+  }
+  const q = session.qs[session.idx];
+  const answered = session.answeredCount||0;
+  const wrongSoFar = answered - session.score;
+  let html = "<div class='card study'><div>"+
+    "<div class='progressline' style='display:flex;justify-content:space-between;align-items:center'>"+
+    "<span>Тест · "+(session.idx+1)+" з "+session.qs.length+
+    (answered>0?" · <span style='color:var(--green)'>✓"+session.score+"</span>"+(wrongSoFar>0?" <span style='color:var(--red)'>✗"+wrongSoFar+"</span>":""):"")+"</span>"+
+    "<button class='btn small ghost' onclick='exitTest()'>На сьогодні досить</button></div>"+
+    kindTag(q.it)+"<div class='word'>"+esc(q.it.text)+"</div>"+
+    (q.it.tr?"<div style='color:var(--muted);font-size:15px;margin-bottom:4px'>["+esc(q.it.tr)+"]</div>":"")+
+    highlightCtx(q.it)+"<div style='margin-top:14px'>";
+  q.options.forEach((opt,i)=>{
+    let cls = "btn opt";
+    if(session.answered!==null){
+      if(opt===q.it.t) cls += " correct";
+      else if(i===session.answered) cls += " wrong";
+    }
+    html += "<button class='"+cls+"' onclick='answerTest("+i+")'>"+esc(opt)+"</button>";
+  });
+  html += "</div></div>";
+  html += session.answered!==null
+    ? "<button class='btn primary block' onclick='nextTest()'>Далі</button>"
+    : "<div style='height:46px'></div>";
+  html += "</div>";
+  app.innerHTML = html;
+}
+function answerTest(i){
+  if(session.answered!==null) return;
+  session.answered = i;
+  session.answeredCount = (session.answeredCount||0) + 1;
+  const q = session.qs[session.idx];
+  if(q.options[i]===q.it.t) session.score++;
+  else { demoteItem(q.it); save(); }
+  rTest();
+}
+function nextTest(){ session.idx++; session.answered=null; rTest(); }
+function exitTest(){
+  const answered = session.answeredCount||0;
+  const correct = session.score;
+  const wrong = answered - correct;
+  const skipped = session.qs.length - answered;
+  const isGlobal = session.global;
+  const backBtn = isGlobal
+    ? "<button class='btn primary block' onclick=\"go('library')\">До бібліотеки</button>"
+    : "<button class='btn primary block' onclick=\"go('song')\">До пісні</button>";
+  app.innerHTML = "<div class='card center study'><div>"+
+    "<div class='bignum'>"+correct+"/"+answered+"</div>"+
+    "<h2>Тест зупинено</h2>"+
+    "<div class='card' style='text-align:left;margin:12px 0'>"+
+    "<div class='list-item'><div class='li-main'>Правильно</div><b style='color:var(--green)'>"+correct+"</b></div>"+
+    "<div class='list-item'><div class='li-main'>Помилок (відкочено назад)</div><b style='color:var(--red)'>"+wrong+"</b></div>"+
+    "<div class='list-item'><div class='li-main'>Не дійшло черги</div><b style='color:var(--muted)'>"+skipped+"</b></div>"+
+    "</div>"+
+    (wrong>0?"<p class='sub'>Слова з помилками вже відкочено — прожени «Вчити» щоб надолужити.</p>":"")+
+    "</div>"+backBtn+"</div>";
+  session = null; save();
+}
+
+/* ---------- stats ---------- */
+function rStats(){
+  const knownCount = Object.keys(state.known).length;
+  let totalItems=0, learned=0;
+  for(const s of state.songs){ totalItems += s.items.length; learned += counts(s).know; }
+  let html = "<div class='topbar'><h1>Статистика</h1>"+
+    "<button class='btn small ghost' onclick=\"go('library')\">← Назад</button></div>"+
+    "<div class='card center'><div class='bignum'>"+knownCount+"</div>"+
+    "<div class='sub'>унікальних слів у твоєму словнику</div></div>"+
+    "<div class='card'><div class='list-item'><div class='li-main'>Пісень у бібліотеці</div><b>"+state.songs.length+"</b></div>"+
+    "<div class='list-item'><div class='li-main'>Всього карток (слова + фрази)</div><b>"+totalItems+"</b></div>"+
+    "<div class='list-item'><div class='li-main'>Вивчено карток</div><b>"+learned+"</b></div></div>";
+  if(state.songs.length){
+    html += "<h2>По піснях</h2><div class='card'>";
+    for(const s of state.songs){
+      const c = counts(s);
+      html += "<div class='list-item'><div class='li-main'><div class='li-w'>"+esc(s.title)+"</div></div>"+
+        "<span class='sub'>"+c.know+" / "+c.total+"</span></div>";
+    }
+    html += "</div>";
+  }
+  html += "<h2>Синхронізація з GitHub</h2>"+
+    "<div class='card'>"+
+    "<p class='sub' style='margin-top:0'>Прогрес зберігатиметься у файл progress.json твого репозиторію і підтягуватиметься на всіх пристроях.</p>"+
+    "<input id='gh-owner' placeholder='Нік на GitHub' value='"+esc(sync.owner)+"' style='width:100%;margin-bottom:8px;background:var(--surface2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit'>"+
+    "<input id='gh-repo' placeholder='Назва репозиторію (lyrics-trainer)' value='"+esc(sync.repo)+"' style='width:100%;margin-bottom:8px;background:var(--surface2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit'>"+
+    "<input id='gh-token' type='password' placeholder='Токен доступу (github_pat_...)' value='"+esc(sync.token)+"' style='width:100%;margin-bottom:8px;background:var(--surface2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit'>"+
+    "<div class='row'>"+
+    "<button class='btn primary' onclick='connectSync()'>"+(syncOn()?"Оновити й перевірити":"Підключити")+"</button>"+
+    (syncOn()?"<button class='btn' onclick='syncNow()'>Синхронізувати зараз</button>":"")+
+    "</div>"+
+    (syncOn()?"<button class='btn small block' style='margin-top:8px;background:transparent;border-color:var(--red);color:var(--red)' onclick='disconnectSync(this)'>Вимкнути синхронізацію</button>":"")+
+    "<div id='sync-status' class='sub' style='margin-top:10px'>"+esc(syncMsg || (syncOn()?"Підключено до "+sync.owner+"/"+sync.repo:"Не підключено"))+"</div>"+
+    "<p class='sub' style='margin-top:8px'>Токен зберігається лише на цьому пристрої і не потрапляє в експорт чи репозиторій. На кожному новому пристрої його треба ввести один раз.</p>"+
+    "</div>";
+  html += "<h2>Резервна копія</h2>"+
+    "<p class='sub'>Експортуй дані перед оновленням додатку або для перенесення на інший пристрій.</p>"+
+    "<div class='row'>"+
+    "<button class='btn small' onclick='exportData()'>Експорт</button>"+
+    "<button class='btn small' onclick=\"document.getElementById('backup-zone').style.display='block'\">Імпорт</button></div>"+
+    "<div id='backup-zone' style='display:none;margin-top:10px'>"+
+    "<textarea id='backup-ta' placeholder='Встав сюди збережену копію...'></textarea>"+
+    "<div id='backup-msg' class='notice'></div>"+
+    "<button class='btn primary block' onclick='importData()'>Відновити з копії</button></div>";
+  html += "<h2>Небезпечна зона</h2>"+
+    "<button class='btn small block' style='background:transparent;border-color:var(--red);color:var(--red)' onclick='resetAll(this)'>Скинути весь прогрес</button>"+
+    "<p class='sub' style='margin-top:6px'>Пісні залишаться, але всі слова стануть «новими», а словник очиститься.</p>";
+  app.innerHTML = html;
+}
+function resetAll(btn){
+  armConfirm(btn, ()=>{
+    for(const s of state.songs) for(const it of s.items) it.status = "new";
+    state.known = {};
+    save(); go("stats");
+  });
+}
+function connectSync(){
+  sync.owner = document.getElementById("gh-owner").value.trim();
+  sync.repo = document.getElementById("gh-repo").value.trim();
+  sync.token = document.getElementById("gh-token").value.trim();
+  saveSyncCfg();
+  if(!syncOn()){ setSyncMsg("Заповни всі три поля."); return; }
+  setSyncMsg("Перевіряю доступ…");
+  pullRemote(false).then(()=>{ go("stats"); });
+}
+function syncNow(){
+  clearTimeout(pushT);
+  pushRemote(false);
+}
+function disconnectSync(btn){
+  armConfirm(btn, ()=>{
+    sync = { owner:"", repo:"", token:"", branch:"main", path:"progress.json" };
+    lastSha = null; saveSyncCfg(); setSyncMsg("");
+    go("stats");
+  });
+}
+function exportData(){
+  const zone = document.getElementById("backup-zone");
+  const ta = document.getElementById("backup-ta");
+  zone.style.display = "block";
+  ta.value = JSON.stringify(state);
+  ta.select();
+  try{
+    navigator.clipboard.writeText(ta.value).then(()=>{
+      document.getElementById("backup-msg").textContent = "Скопійовано в буфер обміну ✓ Збережи цей текст у нотатках.";
+    });
+  }catch(e){
+    document.getElementById("backup-msg").textContent = "Скопіюй текст вище і збережи його в нотатках.";
+  }
+}
+function importData(){
+  const msg = document.getElementById("backup-msg");
+  try{
+    const data = JSON.parse(document.getElementById("backup-ta").value.trim());
+    if(!Array.isArray(data.songs)) throw 0;
+    state = { songs: data.songs, known: data.known || {} };
+    rebuildKnown(); save();
+    go("library");
+  }catch(e){ msg.textContent = "Це не схоже на резервну копію — перевір, що вставлено весь текст."; }
+}
+
+/* ---------- boot ---------- */
+load().then(async ()=>{
+  await loadSyncCfg();
+  render();
+  if(syncOn()) pullRemote(true);
+});
+</script>
+</body>
+</html>
